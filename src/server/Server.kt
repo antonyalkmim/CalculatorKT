@@ -9,30 +9,37 @@ import java.util.*
 
 fun main(args : Array<String>){
 
-    val server = ServerSocket(9999)
-    println("Server running on port ${server.localPort}")
+    val th = Thread({
 
-    val client = server.accept()
-    println("Client conected : ${client.inetAddress.hostAddress}")
+        val server = ServerSocket(9999)
+        println("Server running on port ${server.localPort}")
 
+        while (true) {
 
-    val serializer = CustomSerializer()
+            val client = server.accept()
+            println("Client conected : ${client.inetAddress.hostAddress}")
 
-    val scanner = Scanner(client.inputStream)
-    while (scanner.hasNextLine()) {
-        val text = scanner.nextLine()
-        val requestBytes = text.toByteArray(Charset.defaultCharset())
-        val request = serializer.DeserializeRequest(requestBytes)
+            val serializer = CustomSerializer()
 
-        println("${request.operandA} ${request.operator} ${request.operandB}")
+            val scanner = Scanner(client.inputStream)
+            while (scanner.hasNextLine()) {
+                val text = scanner.nextLine()
+                val requestBytes = text.toByteArray(Charset.defaultCharset())
+                val request = serializer.DeserializeRequest(requestBytes)
 
-        val response = calculate(request.operandA, request.operandB, request.operator)
-        println(response)
-    }
+                println("${request.operandA} ${request.operator} ${request.operandB}")
 
-    scanner.close()
-    server.close()
-    client.close()
+                val response = calculate(request.operandA, request.operandB, request.operator)
+                println(response)
+            }
+
+            scanner.close()
+            client.close()
+        }
+
+        server.close()
+
+    }).start()
 
 }
 
